@@ -1,3 +1,4 @@
 [submodule "GameServerSpecDojo"]
 	path = GameServerSpecDojo
 	url = https://github.com/joro550/GameServerSpecDojo.git
+	branch = version-1
