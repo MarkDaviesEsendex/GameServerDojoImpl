@@ -1,32 +1,52 @@
 #tool "nuget:?package=NUnit.ConsoleRunner"
 
-var ouputDirectory = "ouput";
+var ouputDirectory = "../../ouput";
+var solutionFile = "./**/*.sln";
 
 Task("Clean")
     .Does(() =>
 {
-    if(DirectoryExists(ouputDirectory))
+    var directoriesToClean = GetDirectories("./output");
+    CleanDirectories(directoriesToClean);
+
+    directoriesToClean = GetDirectories("./src/**/bin/");
+    CleanDirectories(directoriesToClean);
+});
+
+Task("NugetRestore")
+    .Does(() =>
+{
+    var solutions = GetFiles(solutionFile);
+    // Restore all NuGet packages.
+    foreach(var solution in solutions)
     {
-        DeleteDirectory(ouputDirectory, recursive:true);
+        Information("Restoring {0}", solution);
+        NuGetRestore(solution);
     }
-    CreateDirectory(ouputDirectory);
 });
 
 Task("Test")
+    .IsDependentOn("Build")
     .Does(() => 
 {
-    NUnit3("Tests.dll");
+    NUnit3("./src/**/bin/**/*.Tests.dll");
 });
 
 Task("Build")
+    .IsDependentOn("Clean")
+    .IsDependentOn("NugetRestore")
     .Does(() =>
 {
-    MSBuild("Solution", new MSBuildSettings()
-        .WithProperty("OutDir", ouputDirectory)
-        .WithProperty("DeployOnBuild", "true")
-        .WithProperty("WebPublishMethod", "Package")
-        .WithProperty("PackageAsSingleFile", "true")
-        .WithProperty("SkipInvalidConfigurations", "true"));
-})
+    var solutions = GetFiles(solutionFile);
+    // Restore all NuGet packages.
+    foreach(var solution in solutions)
+    {
+        Information("Restoring {0}", solution);
+        MSBuild(solution, configurator => 
+                configurator.SetConfiguration("Release")
+                    .SetVerbosity(Verbosity.Minimal)
+                    .WithProperty("OutDir", ouputDirectory));
+    }
+});
 
 RunTarget("Test");
