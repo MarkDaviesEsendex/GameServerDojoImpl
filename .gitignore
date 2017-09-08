@@ -253,3 +253,5 @@ paket-files/
 
 # Cake
 tools/
+
+output/
