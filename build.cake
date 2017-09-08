@@ -1,6 +1,6 @@
 #tool "nuget:?package=NUnit.ConsoleRunner"
 
-var ouputDirectory = "../../ouput";
+var ouputDirectory = "../../output";
 var solutionFile = "./**/*.sln";
 
 Task("Clean")
