@@ -69,20 +69,5 @@ Task("Publish")
     }
 });
 
-Task("Deploy")
-    .IsDependentOn("Publish")
-    .Does(() => 
-{
-    var parameterFile = MakeAbsolute(File("./output/_PublishedWebsites/Server.Web_Package/Server.Web.SetParameters.xml"));
-    var command = MakeAbsolute(File("./output/_PublishedWebsites/Server.Web_Package/Server.Web.deploy.cmd")).ToString();
-    
-    XmlPoke(parameterFile, "//parameters/setParameter[@name='IIS Web Application Name']/@value", "BuildAutomation/MarkD");
-    using(var process = StartAndReturnProcess(command, new ProcessSettings{ Arguments = "/Y -allowUntrusted:true /M:csWebServerD01.collstream.local /U:webdeploy@collstream.local /P:6I542oz0X5" }))
-    {
-        process.WaitForExit();
-        // This should output 0 as valid arguments supplied
-        Information("Exit code: {0}", process.GetExitCode());
-    }
-});
 
 RunTarget("Deploy");
